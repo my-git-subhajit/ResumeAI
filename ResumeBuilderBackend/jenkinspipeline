@@ -1,0 +1,76 @@
+pipeline {
+    agent any
+    environment {
+        DOCKER_HUB_KEY = credentials('subhajit-docker-hub')
+        DOCKER_IMAGE_RESUME_BUILDER_FRONTEND = 'iamgood1989/resume_build_ai'
+        DOCKER_IMAGE_RESUME_BUILDER_BACKEND = 'iamgood1989/resume_build_ai_backend'
+        GITHUB_URL = 'https://github.com/my-git-subhajit/ResumeAI.git'
+        GIT_BRANCH = 'main'
+        DOCKER_TAG = "${env.BUILD_ID}"
+    }
+
+    stages {
+        stage('Hello') {
+            steps {
+                echo 'Hello World'
+            }
+        }
+        stage('checkout') {
+            steps {
+                git branch: env.GIT_BRANCH, url: env.GITHUB_URL
+            }
+        }
+        // stage('docker login'){
+        //   steps {
+        //       script {
+        //             withCredentials([usernamePassword(credentialsId: 'subhajit-docker-hub', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+        //                 sh "echo -n ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin"
+        //              }
+        //         }
+        //     }
+        // }
+        stage('build images') {
+            parallel {
+                stage('build backend') {
+                    steps {
+                        script {
+                            //docker.build(env.DOCKER_IMAGE_RESUME_BUILDER_BACKEND, "./ResumeBuilderBackend/")
+                            withCredentials([usernamePassword(credentialsId: 'subhajit-docker-hub', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                                docker.withRegistry('https://index.docker.io/v1/', 'subhajit-docker-hub') {
+                                    def customImage = docker.build("${env.DOCKER_IMAGE_RESUME_BUILDER_BACKEND}:${env.BUILD_ID}", './ResumeBuilderBackend/')
+                                    // docker.image(env.DOCKER_IMAGE_RESUME_BUILDER_BACKEND).push()
+                                    customImage.push()
+                                }
+                            }
+                        }
+                    }
+                }
+                stage('build frontend') {
+                    steps {
+                        script {
+                            //docker.build(env.DOCKER_IMAGE_RESUME_BUILDER_BACKEND, "./ResumeBuilderBackend/")
+                            withCredentials([usernamePassword(credentialsId: 'subhajit-docker-hub', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                                docker.withRegistry('https://index.docker.io/v1/', 'subhajit-docker-hub') {
+                                    def customImage = docker.build("${env.DOCKER_IMAGE_RESUME_BUILDER_FRONTEND}:${env.BUILD_ID}", './ResumeBuilderAngular/')
+                                    // docker.image(env.DOCKER_IMAGE_RESUME_BUILDER_BACKEND).push()
+                                    customImage.push()
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // stage ('clean'){
+        //     steps{
+        //         script{
+        //             try{
+        //                 docker.image("${env.DOCKER_IMAGE_RESUME_BUILDER_BACKEND}:${env.BUILD_ID}").remove()
+        //                 docker.image("${env.DOCKER_IMAGE_RESUME_BUILDER_FRONTEND}:${env.BUILD_ID}").remove()
+        //             }catch(Exception e) {
+        //         }
+        //     }
+        // }
+        }
+    }

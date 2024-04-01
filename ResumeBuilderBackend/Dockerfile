@@ -9,7 +9,7 @@ RUN npm install -g typescript
 
 RUN tsc --build
 
-EXPOSE 3000
+EXPOSE 4292
 
 CMD ["npm","run","start"]
 

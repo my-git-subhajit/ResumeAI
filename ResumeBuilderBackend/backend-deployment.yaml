@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: resumebuilderbackend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: resumebuilderbackend
+  template:
+    metadata:
+      labels:
+        app: resumebuilderbackend
+    spec:
+      containers:
+      - name: resume-build-ai-backend-k8s
+        image: iamgood1989/resume_build_ai_backend:31
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 4292    
+        
+
