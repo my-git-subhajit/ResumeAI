@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: resume-build-ai-k8s
-        image: iamgood1989/resume_build_ai:31
+        image: iamgood1989/resume_build_ai:33
         resources:
           limits:
             memory: "512Mi"

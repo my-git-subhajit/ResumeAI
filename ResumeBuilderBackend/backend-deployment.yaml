@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: resume-build-ai-backend-k8s
-        image: iamgood1989/resume_build_ai_backend:31
+        image: ${env.DOCKER_IMAGE_RESUME_BUILDER_BACKEND}:${env.BUILD_ID}
         resources:
           limits:
             memory: "512Mi"
